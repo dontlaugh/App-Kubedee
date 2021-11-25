@@ -1,0 +1,348 @@
+#!/bin/bash
+
+[[ -n "${KUBEDEE_DEBUG}" ]] && set -x
+set -euo pipefail
+
+bash_source="${BASH_SOURCE[0]}"
+while [[ -L "${bash_source}" ]]; do
+  bash_dir="$(cd -P "$(dirname "${bash_source}")" && pwd)"
+  bash_source="$(readlink "${bash_source}")"
+  [[ "${bash_source}" != /* ]] && bash_source="${bash_dir}/${bash_source}"
+done
+readonly kubedee_source_dir="$(cd -P "$(dirname "${bash_source}")" && pwd)"
+
+readonly kubedee_config_dir="${HOME}/.config/kubedee"
+
+if [[ -f "${kubedee_config_dir}/config" ]]; then
+  # shellcheck source=/dev/null
+  source "${kubedee_config_dir}/config"
+fi
+
+readonly kubedee_version="$(
+  cd "${kubedee_source_dir}"
+  if git rev-parse --git-dir &>/dev/null; then
+    git describe --tags --always --dirty
+  else
+    echo "dev"
+  fi
+)"
+
+# Option defaults
+apiserver_extra_hostnames=""
+bin_dir="./_output/bin"
+create_admin_sa="false"
+create_user_sa="false"
+install_psps=""
+kubedee_dir="${kubedee_dir:-${HOME}/.local/share/kubedee}"
+kubedee_cache_dir="${kubedee_dir}/cache/${kubedee_version}"
+kubernetes_version=""
+no_set_context="false"
+num_worker=2
+
+# shellcheck source=/dev/null
+source "${kubedee_source_dir}/lib.bash"
+
+if [[ $EUID -eq 0 ]]; then
+  kubedee::exit_error "kubedee is not meant to be run as root"
+fi
+
+exit_usage() {
+  cat >&2 <<USAGE
+kubedee - ${kubedee_version}
+Usage:
+  kubedee [options] controller-ip <cluster name>     print the IPv4 address of the controller node
+  kubedee [options] create <cluster name>            create a cluster
+  kubedee [options] create-admin-sa <cluster name>   create admin service account in cluster
+  kubedee [options] create-user-sa <cluster name>    create user service account in cluster (has 'edit' privileges)
+  kubedee [options] delete <cluster name>            delete a cluster
+  kubedee [options] etcd-env <cluster name>          print etcdctl environment variables
+  kubedee [options] kubectl-env <cluster name>       print kubectl environment variables
+  kubedee [options] list                             list all clusters
+  kubedee [options] smoke-test <cluster name>        smoke test a cluster
+  kubedee [options] start <cluster name>             start a cluster
+  kubedee [options] start-worker <cluster name>      start a new worker node in a cluster
+  kubedee [options] up <cluster name>                create + start in one command
+  kubedee [options] version                          print kubedee version and exit
+
+Options:
+  --apiserver-extra-hostnames <hostname>[,<hostname>]   additional X509v3 Subject Alternative Name to set, comma separated
+  --bin-dir <dir>                                       where to copy the k8s binaries from (default: ./_output/bin)
+  --kubernetes-version <version>                        the release of Kubernetes to install, for example 'v1.12.0'
+                                                        takes precedence over \`--bin-dir\`
+  --no-set-context                                      prevent kubedee from adding a new kubeconfig context
+  --num-worker <num>                                    number of worker nodes to start (default: 2)
+USAGE
+  exit 1
+}
+
+cmd_create() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] && kubedee::exit_error "Found existing cluster with name: ${cluster_name}"
+  kubedee::create_network "${cluster_name}"
+  kubedee::create_storage_pool
+  kubedee::prune_old_caches "${cluster_name}"
+  kubedee::prepare_container_image "${cluster_name}"
+  kubedee::log_info "Creating new cluster ${cluster_name} ..."
+  if [[ -n "${kubernetes_version}" ]]; then
+    kubedee::fetch_k8s "${kubernetes_version}"
+    kubedee::copy_k8s_binaries "${cluster_name}" "${kubedee_cache_dir}/kubernetes/${kubernetes_version}"
+  else
+    kubedee::copy_k8s_binaries "${cluster_name}" "${bin_dir}"
+  fi
+  kubedee::copy_etcd_binaries "${cluster_name}"
+  kubedee::copy_crio_files "${cluster_name}"
+  kubedee::copy_runc_binaries "${cluster_name}"
+  kubedee::copy_cni_plugins "${cluster_name}"
+  kubedee::create_certificate_authority_etcd "${cluster_name}"
+  kubedee::create_certificate_authority_k8s "${cluster_name}"
+  kubedee::create_certificate_authority_aggregation "${cluster_name}"
+  kubedee::create_certificate_aggregation_client "${cluster_name}"
+  kubedee::create_certificate_admin "${cluster_name}"
+}
+
+cmd_delete() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  [[ ! -d "${kubedee_dir}/clusters/${cluster_name}" ]] && kubedee::exit_error "Found no existing cluster with name: ${cluster_name}"
+  kubedee::log_info "Deleting cluster ${cluster_name} ..."
+  for c in $(lxc list --format json | jq -r '.[].name'); do
+    [[ "${c}" == "kubedee-${cluster_name}-"* ]] && lxc delete -f "${c}"
+  done
+  kubedee::delete_network "${cluster_name}"
+  [[ "${no_set_context}" == "false" ]] && kubectl config unset current-context >/dev/null
+  kubectl config delete-context "kubedee-${cluster_name}" &>/dev/null || true
+  rm -rf "${kubedee_dir}/clusters/${cluster_name}"
+}
+
+cmd_start() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] || kubedee::exit_error "Found no cluster with name: ${cluster_name} - did you create it?"
+  local -r admission_plugins="NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota${install_psps:+",PodSecurityPolicy"}"
+  declare -A worker_suffixes
+  for ((i = 0; i < num_worker; i++)); do
+    worker_suffixes[${i}]="$(tr -cd 'a-z0-9' </dev/urandom | head -c 6 || true)"
+  done
+  kubedee::log_info "Starting cluster ${cluster_name} ..."
+  kubedee::launch_etcd "${cluster_name}"
+  kubedee::launch_container "${cluster_name}" "kubedee-${cluster_name}-controller"
+  for ((i = 0; i < num_worker; i++)); do
+    kubedee::launch_container "${cluster_name}" "kubedee-${cluster_name}-worker-${worker_suffixes[${i}]}"
+  done
+  kubedee::configure_etcd "${cluster_name}"
+  kubedee::create_certificate_kubernetes "${cluster_name}" "${apiserver_extra_hostnames}"
+  kubedee::configure_controller "${cluster_name}" "kubedee-${cluster_name}-controller" "${admission_plugins}"
+  for ((i = 0; i < num_worker; i++)); do
+    kubedee::configure_worker "${cluster_name}" "kubedee-${cluster_name}-worker-${worker_suffixes[${i}]}"
+  done
+  kubedee::create_kubeconfig_admin "${cluster_name}"
+  kubedee::configure_rbac "${cluster_name}"
+  if [[ "${install_psps}" == "true" ]]; then
+    kubedee::deploy_pod_security_policies "${cluster_name}"
+  fi
+  kubedee::deploy_flannel "${cluster_name}"
+  kubedee::deploy_core_dns "${cluster_name}"
+  kubedee::wait_for_node "${cluster_name}" "kubedee-${cluster_name}-controller"
+  kubedee::label_and_taint_controller "${cluster_name}" "kubedee-${cluster_name}-controller"
+  for ((i = 0; i < num_worker; i++)); do
+    kubedee::wait_for_node "${cluster_name}" "kubedee-${cluster_name}-worker-${worker_suffixes[${i}]}"
+  done
+  for ((i = 0; i < num_worker; i++)); do
+    kubedee::label_worker "${cluster_name}" "kubedee-${cluster_name}-worker-${worker_suffixes[${i}]}"
+  done
+  [[ "${no_set_context}" == "false" ]] && kubedee::configure_kubeconfig "${cluster_name}"
+  local admin_sa=""
+  if [[ "${create_admin_sa}" == "true" ]]; then
+    kubedee::create_admin_service_account "${cluster_name}"
+    admin_sa="$(kubedee::get_service_account_token "${cluster_name}" kubedee-admin kube-system)"
+  fi
+  if [[ "${create_user_sa}" == "true" ]]; then
+    kubedee::create_user_service_account "${cluster_name}"
+  fi
+  echo
+  kubedee::log_success "Cluster ${cluster_name} started"
+  if [[ "${no_set_context}" == "false" ]]; then
+    kubedee::log_success "kubectl config current-context set to kubedee-${cluster_name}\\n"
+  else
+    echo
+  fi
+  if [[ -n "${admin_sa}" ]]; then
+    kubedee::log_info "Admin service account token can be obtained with 'kubedee admin-sa-token ${cluster_name}'"
+  fi
+  kubedee::log_info "Cluster nodes can be accessed with 'lxc exec <name> bash'"
+  kubedee::log_info "Cluster files can be found in '${kubedee_dir}/clusters/${cluster_name}'\\n"
+  kubedee::log_info "Current node status is (should be ready soon):"
+  kubectl --kubeconfig "${kubedee_dir}/clusters/${cluster_name}/kubeconfig/admin.kubeconfig" get nodes
+  echo
+}
+
+cmd_start-worker() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] || kubedee::exit_error "Found no cluster with name: ${cluster_name} - did you create it?"
+  local name_suffix
+  name_suffix="$(tr -cd 'a-z0-9' </dev/urandom | head -c 6)" || true
+  kubedee::prepare_container_image "${cluster_name}"
+  kubedee::launch_container "${cluster_name}" "kubedee-${cluster_name}-worker-${name_suffix}"
+  kubedee::configure_worker "${cluster_name}" "kubedee-${cluster_name}-worker-${name_suffix}"
+  kubedee::log_success "Node ${cluster_name}-${name_suffix} started"
+}
+
+cmd_list() {
+  mkdir -p "${kubedee_dir}/clusters/"
+  find "${kubedee_dir}/clusters/" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;
+}
+
+cmd_kubectl-env() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  cat <<EOF
+export KUBECONFIG=${kubedee_dir}/clusters/${cluster_name}/kubeconfig/admin.kubeconfig
+EOF
+}
+
+cmd_etcd-env() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  local -r container_name="kubedee-${cluster_name}-etcd"
+  local etcd_ip
+  etcd_ip="$(kubedee::container_ipv4_address "${container_name}")"
+  cat <<EOF
+export ETCDCTL_CACERT=${kubedee_dir}/clusters/${cluster_name}/certificates/ca.pem
+export ETCDCTL_CERT=${kubedee_dir}/clusters/${cluster_name}/certificates/etcd.pem
+export ETCDCTL_KEY=${kubedee_dir}/clusters/${cluster_name}/certificates/etcd-key.pem
+export ETCDCTL_INSECURE_TRANSPORT=false
+export ETCDCTL_ENDPOINTS=https://${etcd_ip}:2379
+export ETCDCTL_API=3
+EOF
+}
+
+cmd_smoke-test() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  kubedee::smoke_test "${cluster_name}"
+}
+
+cmd_version() {
+  echo "${kubedee_version}"
+}
+
+cmd_controller-ip() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  local ip
+  ip="$(kubedee::container_ipv4_address "kubedee-${cluster_name}-controller")"
+  echo "${ip}"
+}
+
+cmd_create-admin-sa() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  kubedee::create_admin_service_account "${cluster_name}"
+}
+
+cmd_admin-sa-token() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  local sa_token
+  sa_token="$(kubedee::get_service_account_token "${cluster_name}" kubedee-admin kube-system)"
+  echo "${sa_token}"
+}
+
+cmd_create-user-sa() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  kubedee::create_user_service_account "${cluster_name}"
+}
+
+cmd_user-sa-token() {
+  local cluster_name
+  cluster_name="$(kubedee::validate_name "${1}")"
+  local sa_token
+  sa_token="$(kubedee::get_service_account_token "${cluster_name}" "kubedee-user")"
+  echo "${sa_token}"
+}
+
+main() {
+  local args=()
+  while [[ $# -gt 0 ]]; do
+    case "${1}" in
+    --apiserver-extra-hostnames)
+      apiserver_extra_hostnames="${2}"
+      shift
+      shift
+      ;;
+    --bin-dir)
+      bin_dir="${2}"
+      shift
+      shift
+      ;;
+    --create-admin-sa)
+      create_admin_sa="true"
+      shift
+      ;;
+    --create-user-sa)
+      create_user_sa="true"
+      shift
+      ;;
+    --dir)
+      kubedee_dir="${2}"
+      kubedee_cache_dir="${kubedee_dir}/cache/${kubedee_version}"
+      shift
+      shift
+      ;;
+    --install-psps)
+      install_psps="true"
+      shift
+      ;;
+    --kubernetes-version)
+      kubernetes_version="${2}"
+      shift
+      shift
+      ;;
+    --num-worker)
+      num_worker="${2}"
+      shift
+      shift
+      ;;
+    --no-set-context)
+      no_set_context="true"
+      shift
+      ;;
+    help | -h | --help)
+      exit_usage
+      ;;
+    *)
+      args+=("${1}")
+      shift
+      ;;
+    esac
+  done
+  # shellcheck disable=SC2034
+  declare -g -r kubedee_dir kubedee_cache_dir
+  mkdir -p "${kubedee_dir}"
+  # Bash 4.3.48(1)-release does see `${args[@]}` as unbound,
+  # 4.4.12(1)-release does not. Disable `nounset` temporarily.
+  set +u
+  set -- "${args[@]}"
+  set -u
+  local -r cmd="${1:-list}"
+  shift || true
+  case "${cmd}" in
+  admin-sa-token | controller-ip | create | create-admin-sa | create-user-sa | delete | etcd-env | kubectl-env | list | smoke-test | start | start-worker | user-sa-token | version)
+    "cmd_${cmd}" "$@"
+    ;;
+  up)
+    cmd_create "$@"
+    cmd_start "$@"
+    ;;
+  *)
+    echo "Unknown command: ${cmd}" >&2
+    echo "See \`kubedee help\` for help" >&2
+    exit 1
+    ;;
+  esac
+}
+
+main "$@"

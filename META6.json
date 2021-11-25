@@ -1,0 +1,24 @@
+{
+  "authors": [
+    "Coleman McFarland"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+  ],
+  "description": "blah blah blah",
+  "license": "Apache-2.0",
+  "name": "App::Kubedee",
+  "perl": "6.d",
+  "provides": {
+    "App::Kubedee": "lib/App/Kubedee.rakumod"
+  },
+  "resources": [
+  ],
+  "source-url": "",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}

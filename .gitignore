@@ -1,0 +1,7 @@
+.*.swp
+.vagrant
+*.log
+.idea
+
+# should i ingore this?
+.precomp

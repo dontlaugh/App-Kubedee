@@ -6,13 +6,15 @@
   "build-depends": [
   ],
   "depends": [
+      "Getopt::Long"
   ],
-  "description": "",
+  "description": "Launch multi-node Kubernetes clusters on LXD",
   "license": "Apache-2.0",
-  "name": "kubdee",
+  "name": "kubedee",
   "perl": "6.d",
   "provides": {
-    "kubdee": "lib/kubdee.rakumod"
+    "kubedee": "lib/kubedee.rakumod"
+
   },
   "resources": [
   ],

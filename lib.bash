@@ -1435,7 +1435,8 @@ apt-get update
 
 # crio requires libgpgme11
 # helm requires socat
-apt-get install -y libgpgme11 socat
+# kitty terminal
+apt-get install -y libgpgme11 socat kitty-terminfo
 
 rm -rf /var/cache/apt
 EOF

@@ -1,0 +1,6 @@
+use Test;
+use App::Kubedee;
+
+pass "replace me";
+
+done-testing;

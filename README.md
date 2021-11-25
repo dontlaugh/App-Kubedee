@@ -22,6 +22,8 @@ Clone this repo. Then,
 zef install .
 ```
 
+Study [these docs](https://docs.raku.org/language/modules#Testing_modules_and_a_distribution)
+
 ## Local Data
 
 kubedee stores all data in `~/.local/share/kubedee/...`. kubedee LXD resources

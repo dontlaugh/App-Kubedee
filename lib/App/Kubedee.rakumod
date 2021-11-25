@@ -1,3 +1,3 @@
-unit class App::Kubedee;
+unit class App::Kubedee:ver<1.0.0>;
 
-#class Args {}
+

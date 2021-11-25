@@ -1,20 +1,17 @@
 {
-  "auth": "github:dontlaugh",
   "authors": [
     "Coleman McFarland"
   ],
   "build-depends": [
   ],
   "depends": [
-      "Getopt::Long"
   ],
   "description": "Launch multi-node Kubernetes clusters on LXD",
   "license": "Apache-2.0",
   "name": "kubedee",
   "perl": "6.d",
   "provides": {
-    "kubedee": "lib/kubedee.rakumod"
-
+    "App::Kubedee": "lib/App/Kubedee.rakumod"
   },
   "resources": [
   ],

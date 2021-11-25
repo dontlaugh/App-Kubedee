@@ -24,7 +24,7 @@
 #  --no-set-context                                      prevent kubedee from adding a new kubeconfig context
 #  --num-worker <num>                                    number of worker nodes to start (default: 2)
 
-need Kubedee;
+need App::Kubedee;
 
 sub MAIN(*@args) {
     say "{@args}";

@@ -1,11 +1,5 @@
-
-#12:56 started building rakudo star
-#
-
-sub MAIN() {
-
-}
-
+# This is the cli interface we are rebuilding from bash to raku
+# list, create, up are most-used
 #kubedee - v0.7.0-68-gebab5bd
 #Usage:
 #  kubedee [options] controller-ip <cluster name>     print the IPv4 address of the controller node
@@ -29,3 +23,8 @@ sub MAIN() {
 #                                                        takes precedence over `--bin-dir`
 #  --no-set-context                                      prevent kubedee from adding a new kubeconfig context
 #  --num-worker <num>                                    number of worker nodes to start (default: 2)
+
+sub MAIN() {
+
+}
+

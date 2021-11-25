@@ -1,0 +1,26 @@
+{
+  "auth": "github:dontlaugh",
+  "authors": [
+    "Coleman McFarland"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+    
+  ],
+  "description": "",
+  "license": "Apache-2.0",
+  "name": "App::Kubedee",
+  "perl": "6.d",
+  "provides": {
+    "App::Kubedee": "bin/kubedee.raku"
+  },
+  "resources": [
+  ],
+  "source-url": "https://github.com/dontlaugh/kubedee.git",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "1.0.0"
+}

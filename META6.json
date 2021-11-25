@@ -6,14 +6,13 @@
   "build-depends": [
   ],
   "depends": [
-    
   ],
   "description": "",
   "license": "Apache-2.0",
-  "name": "App::Kubedee",
+  "name": "kubdee",
   "perl": "6.d",
   "provides": {
-    "App::Kubedee": "bin/kubedee.raku"
+    "kubdee": "lib/kubdee.rakumod"
   },
   "resources": [
   ],

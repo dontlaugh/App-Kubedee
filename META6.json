@@ -5,6 +5,7 @@
   "build-depends": [
   ],
   "depends": [
+    "JSON::Fast"
   ],
   "description": "K8s clusters on LXD",
   "license": "Apache-2.0",

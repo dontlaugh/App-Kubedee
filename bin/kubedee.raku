@@ -5,9 +5,9 @@ use App::Kubedee;
 
 my $kubedee_version = "1.0.0";
 my $home = %*ENV{'HOME'};
-my $kubedee_dir = "{$home}/.local/share/kubedee";
-my $kubedee_config_dir = "{$home}/.config/kubedee";
-my $kubedee_cache_dir = "{$kubedee_config_dir}/cache/{$kubedee_version}";
+my $kubedee-dir = "{$home}/.local/share/kubedee";
+my $kubedee-config-dir = "{$home}/.config/kubedee";
+my $kubedee-cache-dir = "{$kubedee-dir}/cache/{$kubedee_version}";
 my $install_psps = False;
 
 
@@ -104,12 +104,9 @@ class Cluster {
 class LXD {
     has $!project = "default";
 
-    has $!base-network-id = "kubedee-";
-
-    method create_network(::CLASS:U $lxd, Str $name --> Str) {
+    method create-network(::CLASS:U $lxd, Str $name --> Str) {
         #my $rand;
         #$rand ~= ('0' .. 'z').pick() for 1..5;
-        my $network-id = "{$!base-network-id}{$name}";
 
         # check if it exists
         my $proc = run 'lxc', 'network', 'list', '--format=json', :out;
@@ -118,46 +115,43 @@ class LXD {
 
         # create network if it doesn't exist
         unless $exists {
-            run 'lxc', 'network', 'create', $network-id;
+            run 'lxc', 'network', 'create', $name;
         }
 
-
-        $network-id;
+        $name;
     }
-    method delete_network(::CLASS:U $lxd) {
+    method delete-network(::CLASS:U $lxd) {
     
     }
-    method create_storage_pool(::CLASS:U $lxd) {
+    method create-storage-pool(::CLASS:U $lxd) {
+        #TODO
     
     }
-    method launch_container(::CLASS:U $lxd) {
+    method launch-container(::CLASS:U $lxd) {
     
     }
-    method launch_etcd(::CLASS:U $lxd) {
+    method launch-etcd(::CLASS:U $lxd) {
     
     }
-    method prepare_container_image(::CLASS:U $lxd) {
+    method container-ipv4-address(::CLASS:U $lxd) {
     
     }
-    method container_ipv4_address(::CLASS:U $lxd) {
+    method copy-cni-plugins(::CLASS:U $lxd) {
     
     }
-    method copy_cni_plugins(::CLASS:U $lxd) {
+    method copy-crio-files(::CLASS:U $lxd) {
     
     }
-    method copy_crio_files(::CLASS:U $lxd) {
+    method copy-etcd-binaries(::CLASS:U $lxd) {
     
     }
-    method copy_etcd_binaries(::CLASS:U $lxd) {
+    method copy-k8s-binaries(::CLASS:U $lxd) {
     
     }
-    method copy_k8s_binaries(::CLASS:U $lxd) {
+    method copy-runc-binaries(::CLASS:U $lxd) {
     
     }
-    method copy_runc_binaries(::CLASS:U $lxd) {
-    
-    }
-    method container_status_code(::CLASS:U $lxd) {
+    method container-status-code(::CLASS:U $lxd) {
     
     }
 
@@ -167,47 +161,88 @@ class Kubedee {
     has $.dir;
     has $.config-dir;
     has $.cache-dir;
+    has $.cluster-name;
 
     method init-dirs {
         # make dirs;
-        mkdir $.dir;
-        mkdir $.config-dir;
-        mkdir $.cache-dir;
+        mkdir $!dir;
+        mkdir $!config-dir;
+        mkdir $!cache-dir;
+        mkdir "{$!dir}/clusters/{$!cluster-name}";
+    }
+
+    method init-lxd-resources {
+        # create network
+        LXD.create-network: "kubedee-{$!cluster-name}";
+        # create storage pool
+        # TODO: just use default for now but allow this
+
+        # create base image (kubedee::prepare_container_image)
+        # in LXD this is just a few packages: socat, libgpgme11 kitty-terminfo
     }
     # Kubedee
     # LXD high level routines
     # create certs, kubeconfig, lxc device add, systemd units
-    method fetch_cni_plugins(::CLASS:U $kd) {
+
+    method prepare-container-image(::CLASS:U $kd) {
+        LXD.image-list
+    
     }
-    method fetch_crio(::CLASS:U $kd) {
+
+    method fetch-etcd(::CLASS:U $kd) {
+
     }
-    method fetch_etcd(::CLASS:U $kd) {
+
+    method fetch-cni-plugins(::CLASS:U $kd) {
+
     }
-    method fetch_k8s(::CLASS:U $kd) {
+
+    method fetch-crio(::CLASS:U $kd) {
     }
-    method fetch_runc(::CLASS:U $kd) {
+
+    method fetch-k8s(::CLASS:U $kd) {
+        # fetch kube-apiserver,kube-controller-manager,kubectl,kubelet,kube-proxy,kube-scheduler
     }
-    method log_(::CLASS:U $kd) {
+
+    method fetch-runc(::CLASS:U $kd) {
     }
-    method prune_old_caches(::CLASS:U $kd) {
+
+    method log(::CLASS:U $kd) {
     }
-    method smoke_test(::CLASS:U $kd) {
+
+    method prune-old-caches(::CLASS:U $kd) {
+        # ~/.local/share/kubedee/cache/v0.7.0-67-g40e761a-dirty
+        my @dirs = dir $!cache-dir;
+        for @dirs -> $d {
+            say "pruning dir $d";
+            rmdir $d;
+        }
     }
-    method configure_worker(::CLASS:U $kd) {
+
+    method smoke-test(::CLASS:U $kd) {
     }
-    method configure_controller(::CLASS:U $kd) {
+
+    method configure-worker(::CLASS:U $kd) {
     }
-    method configure_etcd(::CLASS:U $kd) {
+
+    method configure-controller(::CLASS:U $kd) {
     }
-    method apiserver_wait_running(::CLASS:U $kd) {
+
+    method configure-etcd(::CLASS:U $kd) {
     }
-    method container_wait_running(::CLASS:U $kd) {
+
+    method apiserver-wait-running(::CLASS:U $kd) {
     }
+
+    method container-wait-running(::CLASS:U $kd) {
+    }
+
 
 }
 
 ## Main subroutines
 ## todo: validate cluster name
+
 
 multi sub MAIN('controller-ip', Str $cluster-name) {
     say "controller-ip...";
@@ -221,10 +256,11 @@ multi sub MAIN('create',
     Str :$bin-dir = "./_output/bin",
 ) {
     say "create...";
-    
-    ## lxd ops
-    # create network
-    # create storage pool
+    my $kd = Kubedee.new(cluster-name => $cluster-name, dir => $kubedee-dir, cache-dir => $kubedee-cache-dir,
+        config-dir => $kubedee-config-dir);
+    $kd.init-dirs;
+    $kd.init-lxd-resources;
+
     
     ## assemble k8s
     # download k8s binaries

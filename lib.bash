@@ -95,15 +95,15 @@ kubedee::validate_name() {
 
 # Args:
 #   $1 The validated cluster name
-kubedee::prune_old_caches() {
-  local -r cluster_name="${1}"
-  kubedee::log_info "Pruning old kubedee caches ..."
-  for cache_dir in "${kubedee_dir}/cache/"*; do
-    if [[ "${cache_dir}" != "${kubedee_cache_dir}" ]]; then
-      rm -rf "${cache_dir}"
-    fi
-  done
-}
+# kubedee::prune_old_caches() {
+#   local -r cluster_name="${1}" #unused?
+#   kubedee::log_info "Pruning old kubedee caches ..."
+#   for cache_dir in "${kubedee_dir}/cache/"*; do
+#     if [[ "${cache_dir}" != "${kubedee_cache_dir}" ]]; then
+#       rm -rf "${cache_dir}"
+#     fi
+#   done
+# }
 
 # Args:
 #   $1 The target file or directory
@@ -301,7 +301,7 @@ kubedee::copy_cni_plugins() {
 #   $1 The validated cluster name
 kubedee::create_network() {
   local -r cluster_name="${1}"
-  mkdir -p "${kubedee_dir}/clusters/${cluster_name}"
+  # mkdir -p "${kubedee_dir}/clusters/${cluster_name}"
   local -r network_id_file="${kubedee_dir}/clusters/${cluster_name}/network_id"
   local network_id
   if [[ -e "${network_id_file}" ]]; then
@@ -337,14 +337,14 @@ kubedee::delete_network() {
 # Args:
 #   $1 The storage pool name (optional)
 #   $2 The storage pool driver (optional)
-kubedee::create_storage_pool() {
-  local -r cluster_name="${1:-kubedee}"
-  local -r driver="${2:-btrfs}"
-  if ! lxc storage show "${cluster_name}" &>/dev/null; then
-    kubedee::log_info "Creating new storage pool for kubedee ..."
-    lxc storage create "${cluster_name}" "${driver}"
-  fi
-}
+# kubedee::create_storage_pool() {
+#   local -r cluster_name="${1:-kubedee}"
+#   local -r driver="${2:-btrfs}"
+#   if ! lxc storage show "${cluster_name}" &>/dev/null; then
+#     kubedee::log_info "Creating new storage pool for kubedee ..."
+#     lxc storage create "${cluster_name}" "${driver}"
+#   fi
+# }
 
 # Args:
 #   $1 The full container name

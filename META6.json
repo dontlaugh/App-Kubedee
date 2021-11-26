@@ -6,7 +6,7 @@
   ],
   "depends": [
   ],
-  "description": "blah blah blah",
+  "description": "K8s clusters on LXD",
   "license": "Apache-2.0",
   "name": "App::Kubedee",
   "perl": "6.d",
@@ -32,7 +32,7 @@
     "scripts/lint-bash",
     "scripts/smoke-test"
   ],
-  "source-url": "",
+  "source-url": "https://github.com/dontlaugh/App-Kubedee.git",
   "tags": [
   ],
   "test-depends": [

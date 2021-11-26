@@ -4,7 +4,7 @@
 
 cmd_create() {
   local cluster_name
-  [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] && kubedee::exit_error "Found existing cluster with name: ${cluster_name}"
+  # [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] && kubedee::exit_error "Found existing cluster with name: ${cluster_name}"
   kubedee::create_network "${cluster_name}"
   kubedee::create_storage_pool
   kubedee::prune_old_caches "${cluster_name}"
@@ -105,7 +105,6 @@ cmd_start() {
 
 cmd_start-worker() {
   local cluster_name
-  cluster_name="$(kubedee::validate_name "${1}")"
   [[ -d "${kubedee_dir}/clusters/${cluster_name}" ]] || kubedee::exit_error "Found no cluster with name: ${cluster_name} - did you create it?"
   local name_suffix
   name_suffix="$(tr -cd 'a-z0-9' </dev/urandom | head -c 6)" || true

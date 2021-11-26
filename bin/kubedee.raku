@@ -15,6 +15,85 @@ my %*SUB-MAIN-OPTS =
   :named-anywhere,
 ;
 
+# CFSSL
+class CFSsl {
+    # $cert-dir holds our cluster certificates and cfssl configs
+    #   $cert-dir/{ca.pem,ca-key.pem,ca-config.json,profile.k8s}
+    has Str $!cert-dir;
+
+    method create_certificate_admin(Str $cluster-name) {
+
+    }
+    method create_certificate_aggregation_client() {
+
+    }
+    method create_certificate_authority_aggregation() {
+
+    }
+    method create_certificate_authority_etcd() {
+
+    }
+    method create_certificate_authority_k8s() {
+
+    }
+    method create_certificate_etcd() {
+
+    }
+    method create_certificate_kube_controller_manager() {
+
+    }
+    method create_certificate_kubernetes() {
+
+    }
+    method create_certificate_kube_scheduler() {
+
+    }
+    method create_certificate_worker() {
+
+    }
+
+}
+
+
+class Kubectl {
+    method label_and_taint_controller(::CLASS:U $k) {
+
+    }
+    method label_worker(::CLASS:U $k) {
+
+    }
+    method deploy_core_dns(::CLASS:U $k) {
+
+    }
+    method deploy_flannel(::CLASS:U $k) {
+
+    }
+    method deploy_pod_security_policies(::CLASS:U $k) {
+
+    }
+    method create_user_service_account(::CLASS:U $k) {
+
+    }
+    method create_kubeconfig_admin(::CLASS:U $k) {
+
+    }
+    method create_kubeconfig_controller(::CLASS:U $k) {
+
+    }
+    method create_kubeconfig_worker(::CLASS:U $k) {
+
+    }
+    method create_admin_service_account(::CLASS:U $k) {
+
+    }
+    method configure_rbac(::CLASS:U $k) {
+
+    }
+    method wait_for_node(::CLASS:U $k) {
+
+    }
+}
+
 class Cluster {
     has $!name;
 
@@ -45,6 +124,42 @@ class LXD {
 
         $network-id;
     }
+    method delete_network(::CLASS:U $lxd) {
+    
+    }
+    method create_storage_pool(::CLASS:U $lxd) {
+    
+    }
+    method launch_container(::CLASS:U $lxd) {
+    
+    }
+    method launch_etcd(::CLASS:U $lxd) {
+    
+    }
+    method prepare_container_image(::CLASS:U $lxd) {
+    
+    }
+    method container_ipv4_address(::CLASS:U $lxd) {
+    
+    }
+    method copy_cni_plugins(::CLASS:U $lxd) {
+    
+    }
+    method copy_crio_files(::CLASS:U $lxd) {
+    
+    }
+    method copy_etcd_binaries(::CLASS:U $lxd) {
+    
+    }
+    method copy_k8s_binaries(::CLASS:U $lxd) {
+    
+    }
+    method copy_runc_binaries(::CLASS:U $lxd) {
+    
+    }
+    method container_status_code(::CLASS:U $lxd) {
+    
+    }
 
 }
 
@@ -58,6 +173,35 @@ class Kubedee {
         mkdir $.dir;
         mkdir $.config-dir;
         mkdir $.cache-dir;
+    }
+    # Kubedee
+    # LXD high level routines
+    # create certs, kubeconfig, lxc device add, systemd units
+    method fetch_cni_plugins(::CLASS:U $kd) {
+    }
+    method fetch_crio(::CLASS:U $kd) {
+    }
+    method fetch_etcd(::CLASS:U $kd) {
+    }
+    method fetch_k8s(::CLASS:U $kd) {
+    }
+    method fetch_runc(::CLASS:U $kd) {
+    }
+    method log_(::CLASS:U $kd) {
+    }
+    method prune_old_caches(::CLASS:U $kd) {
+    }
+    method smoke_test(::CLASS:U $kd) {
+    }
+    method configure_worker(::CLASS:U $kd) {
+    }
+    method configure_controller(::CLASS:U $kd) {
+    }
+    method configure_etcd(::CLASS:U $kd) {
+    }
+    method apiserver_wait_running(::CLASS:U $kd) {
+    }
+    method container_wait_running(::CLASS:U $kd) {
     }
 
 }
@@ -168,3 +312,4 @@ Options:
   --num-worker <num>                                    number of worker nodes to start (default: 2)
 EOH
 }
+

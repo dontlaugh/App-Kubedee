@@ -92,12 +92,6 @@ kubedee::validate_name() {
   echo "${name}"
 }
 
-# Args:
-#   $1 The target directory
-kubedee::cd_or_exit_error() {
-  local -r target="${1}"
-  cd "${target}" || kubedee::exit_error "Failed to cd to ${target}"
-}
 
 # Args:
 #   $1 The validated cluster name

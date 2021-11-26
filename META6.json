@@ -14,11 +14,28 @@
     "App::Kubedee": "lib/App/Kubedee.rakumod"
   },
   "resources": [
+    "contrib/bash_completion.d/kubedee",
+    "contrib/cncf-k8s-conformance/README.md",
+    "contrib/crio-build-script/build",
+    "contrib/terraform/hetzner-cloud/README.md",
+    "contrib/terraform/hetzner-cloud/hcloud.tf",
+    "contrib/terraform/hetzner-cloud/provider.tf",
+    "contrib/terraform/hetzner-cloud/terraform.tfvars.example",
+    "contrib/terraform/hetzner-cloud/user-data.bash",
+    "manifests/core-dns.yml",
+    "manifests/ingress-nginx.yml",
+    "manifests/kube-flannel.yml",
+    "manifests/nginx.yml",
+    "manifests/pod-security-policies.yml",
+    "manifests/service-account-admin.yml",
+    "manifests/service-account-user.yml",
+    "scripts/lint-bash",
+    "scripts/smoke-test"
   ],
   "source-url": "",
   "tags": [
   ],
   "test-depends": [
   ],
-  "version": "0.0.1"
+  "version": "1.0.0"
 }

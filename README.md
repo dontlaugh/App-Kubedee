@@ -1,4 +1,13 @@
-[![Actions Status](https://github.com/dontlaugh/App-Kubedee/workflows/test/badge.svg)](https://github.com/dontlaugh/App-Kubedee/actions)
+# kubedee
 
 
 
+## Prebuild Images
+
+Build the Packer images, locally
+
+```
+lxc remote switch local
+cd resources/packer
+packer build build.pkr.hcl
+```

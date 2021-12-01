@@ -3,6 +3,7 @@ Description=Kubernetes Controller Manager
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
+EnvironmentFile=
 ExecStart=/usr/local/bin/kube-controller-manager \
   --allocate-node-cidrs=true \
   --cluster-cidr=10.244.0.0/16 \

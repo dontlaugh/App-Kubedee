@@ -2,8 +2,9 @@
 Description=etcd
 
 [Service]
+EnvironmentFile=
 ExecStart=/usr/local/bin/etcd \
-  --name "${container_name}" \
+  --name "${CONTAINER_NAME}" \
   --cert-file="/etc/etcd/etcd.pem" \
   --key-file="/etc/etcd/etcd-key.pem" \
   --peer-cert-file="/etc/etcd/etcd.pem" \
@@ -12,12 +13,12 @@ ExecStart=/usr/local/bin/etcd \
   --peer-trusted-ca-file="/etc/etcd/ca-etcd.pem" \
   --peer-client-cert-auth \
   --client-cert-auth \
-  --initial-advertise-peer-urls "https://${ip}:2380" \
-  --listen-peer-urls "https://${ip}:2380" \
-  --listen-client-urls "https://${ip}:2379,http://127.0.0.1:2379" \
-  --advertise-client-urls "https://${ip}:2379" \
+  --initial-advertise-peer-urls "https://${ETCD_IP}:2380" \
+  --listen-peer-urls "https://${ETCD_IP}:2380" \
+  --listen-client-urls "https://${ETCD_IP}:2379,http://127.0.0.1:2379" \
+  --advertise-client-urls "https://${ETCD_IP}:2379" \
   --initial-cluster-token "etcd-cluster-0" \
-  --initial-cluster "${container_name}=https://${ip}:2380" \
+  --initial-cluster "${CONTAINER_NAME}=https://${ETCD_IP}:2380" \
   --initial-cluster-state "new" \
   --data-dir="/var/lib/etcd"
 Restart=on-failure

@@ -2,6 +2,7 @@
 Description=Kubernetes API Server
 
 [Service]
+EnvironmentFile=
 ExecStart=/usr/local/bin/kube-apiserver \
   --allow-privileged=true \
   --apiserver-count=3 \
@@ -12,18 +13,18 @@ ExecStart=/usr/local/bin/kube-apiserver \
   --authorization-mode=Node,RBAC \
   --bind-address=0.0.0.0 \
   --client-ca-file=/etc/kubernetes/ca.pem \
-  --enable-admission-plugins=${admission_plugins} \
+  --enable-admission-plugins="${ADMISSION_PLUGINS}" \
   --enable-swagger-ui=true \
   --etcd-cafile=/etc/kubernetes/ca-etcd.pem \
   --etcd-certfile=/etc/kubernetes/etcd.pem \
   --etcd-keyfile=/etc/kubernetes/etcd-key.pem \
-  --etcd-servers=https://${etcd_ip}:2379 \
+  --etcd-servers="https://${ETCD_IP}:2379" \
   --event-ttl=1h \
   --kubelet-certificate-authority=/etc/kubernetes/ca.pem \
   --kubelet-client-certificate=/etc/kubernetes/kubernetes.pem \
   --kubelet-client-key=/etc/kubernetes/kubernetes-key.pem \
   --runtime-config=rbac.authorization.k8s.io/v1alpha1 \
-  --service-account-issuer=https://api \
+  --service-account-issuer="https://api" \
   --service-account-signing-key-file=/etc/kubernetes/ca-key.pem \
   --service-account-api-audiences=kubernetes.default.svc \
   --service-account-key-file=/etc/kubernetes/ca-key.pem \

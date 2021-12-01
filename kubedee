@@ -9,7 +9,6 @@ cmd_create() {
   # kubedee::create_storage_pool
   # kubedee::prune_old_caches "${cluster_name}"
   kubedee::prepare_container_image "${cluster_name}"
-  kubedee::log_info "Creating new cluster ${cluster_name} ..."
   if [[ -n "${kubernetes_version}" ]]; then
     kubedee::fetch_k8s "${kubernetes_version}"
     kubedee::copy_k8s_binaries "${cluster_name}" "${kubedee_cache_dir}/kubernetes/${kubernetes_version}"

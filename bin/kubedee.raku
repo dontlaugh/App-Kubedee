@@ -2,6 +2,7 @@
 # https://docs.raku.org/language/create-cli#sub_USAGE
 use JSON::Fast;
 use App::Kubedee;
+use App::Example;
 
 my $kubedee_version = "1.0.0";
 my $home = %*ENV{'HOME'};
@@ -298,6 +299,11 @@ class Kubedee {
 
 ## Main subroutines
 ## todo: validate cluster name
+
+multi sub MAIN('hello') {
+    my $ex = Example.new;
+    $ex.hello-world;
+}
 
 
 multi sub MAIN('controller-ip', Str $cluster-name) {

@@ -8,17 +8,22 @@ cmd_create() {
   # kubedee::create_network "${cluster_name}"
   # kubedee::create_storage_pool
   # kubedee::prune_old_caches "${cluster_name}"
-  kubedee::prepare_container_image "${cluster_name}"
-  if [[ -n "${kubernetes_version}" ]]; then
-    kubedee::fetch_k8s "${kubernetes_version}"
-    kubedee::copy_k8s_binaries "${cluster_name}" "${kubedee_cache_dir}/kubernetes/${kubernetes_version}"
-  else
-    kubedee::copy_k8s_binaries "${cluster_name}" "${bin_dir}"
-  fi
-  kubedee::copy_etcd_binaries "${cluster_name}"
-  kubedee::copy_crio_files "${cluster_name}"
-  kubedee::copy_runc_binaries "${cluster_name}"
-  kubedee::copy_cni_plugins "${cluster_name}"
+
+  # NOTE: commenting these out, assuming we've taken care of these
+  # with our packer build
+  # kubedee::prepare_container_image "${cluster_name}"
+  # if [[ -n "${kubernetes_version}" ]]; then
+  #   kubedee::fetch_k8s "${kubernetes_version}"
+  #   kubedee::copy_k8s_binaries "${cluster_name}" "${kubedee_cache_dir}/kubernetes/${kubernetes_version}"
+  # else
+  #   kubedee::copy_k8s_binaries "${cluster_name}" "${bin_dir}"
+  # fi
+  # kubedee::copy_etcd_binaries "${cluster_name}"
+  # kubedee::copy_crio_files "${cluster_name}"
+  # kubedee::copy_runc_binaries "${cluster_name}"
+  # kubedee::copy_cni_plugins "${cluster_name}"
+
+  
   kubedee::create_certificate_authority_etcd "${cluster_name}"
   kubedee::create_certificate_authority_k8s "${cluster_name}"
   kubedee::create_certificate_authority_aggregation "${cluster_name}"

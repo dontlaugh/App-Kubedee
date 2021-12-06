@@ -1,8 +1,8 @@
 # cli help
 # https://docs.raku.org/language/create-cli#sub_USAGE
 use JSON::Fast;
-use App::Kubedee;
-use App::Example;
+# use App::Kubedee;
+use App::Example2;
 
 my $kubedee_version = "1.0.0";
 my $home = %*ENV{'HOME'};
@@ -301,7 +301,7 @@ class Kubedee {
 ## todo: validate cluster name
 
 multi sub MAIN('hello') {
-    my $ex = Example.new;
+    my $ex = App::Example2.new;
     $ex.hello-world;
 }
 

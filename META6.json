@@ -12,7 +12,8 @@
   "name": "App::Kubedee",
   "perl": "6.d",
   "provides": {
-    "App::Kubedee": "lib/App/Kubedee.rakumod"
+    "App::Kubedee": "lib/App/Kubedee.rakumod",
+    "App::Example2": "lib/App/Example.rakumod"
   },
   "resources": [
     "contrib/bash_completion.d/kubedee",

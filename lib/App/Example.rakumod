@@ -1,4 +1,4 @@
-unit class App::Example:ver<1.0.0>;
+unit class App::Example2:ver<1.0.0>;
 
 
 method hello-world() {

@@ -1,5 +1,48 @@
 unit class App::CFSSL:ver<1.0.0>;
 
+## We need to create all these:
+#certificates/admin-key.pem
+#certificates/admin.csr
+#certificates/admin.pem
+#certificates/aggregation-client-key.pem
+#certificates/aggregation-client.csr
+#certificates/aggregation-client.pem
+#certificates/ca-aggregation-key.pem
+#certificates/ca-aggregation.csr
+#certificates/ca-aggregation.pem
+#certificates/ca-config.json
+#certificates/ca-etcd-key.pem
+#certificates/ca-etcd.csr
+#certificates/ca-etcd.pem
+#certificates/ca-key.pem
+#certificates/ca.csr
+#certificates/ca.pem
+#certificates/etcd-key.pem
+#certificates/etcd.csr
+#certificates/etcd.pem
+#certificates/kube-controller-manager-key.pem
+#certificates/kube-controller-manager.csr
+#certificates/kube-controller-manager.pem
+#certificates/kube-proxy-key.pem
+#certificates/kube-proxy.csr
+#certificates/kube-proxy.pem
+#certificates/kube-scheduler-key.pem
+#certificates/kube-scheduler.csr
+#certificates/kube-scheduler.pem
+#certificates/kubedee-optest-controller-key.pem
+#certificates/kubedee-optest-controller.csr
+#certificates/kubedee-optest-controller.pem
+#certificates/kubedee-optest-worker-h1wt5x-key.pem
+#certificates/kubedee-optest-worker-h1wt5x.csr
+#certificates/kubedee-optest-worker-h1wt5x.pem
+#certificates/kubedee-optest-worker-y94etu-key.pem
+#certificates/kubedee-optest-worker-y94etu.csr
+#certificates/kubedee-optest-worker-y94etu.pem
+#certificates/kubernetes-key.pem
+#certificates/kubernetes.csr
+#certificates/kubernetes.pem
+
+
 
 # $cert-dir holds our cluster certificates and cfssl configs
 #   $cert-dir/{ca.pem,ca-key.pem,ca-config.json,profile.k8s}

@@ -17,16 +17,19 @@ multi sub MAIN('controller-ip', Str $cluster-name) {
 
 multi sub MAIN('create', 
     Str $cluster-name,
-    Str :$kubernetes-version = 'v1.21.1',
-    Int :$num-worker = 2,
-    Bool :$no-set-context,
 ) {
     say "create...";
     my $kd = App::Kubedee.new: $cluster-name;
     $kd.init-dirs;
 
-    my $ca = App::CFSSL.new($kd.certdir);
-    $ca.create-certificate-authority;
+    my $ca = App::CFSSL.new($kd.cert-dir);
+    $ca.init-signing-config;
+    $ca.create-certificate-authority: 'ca', 'Kubernetes';
+    $ca.create-certificate-authority: 'ca-aggregation', 'Kubernetes Front Proxy CA';
+    $ca.create-certificate-authority: 'ca-etcd', 'etcd';
+    $ca.create-certificate: 'ca', 'admin';
+    $ca.create-certificate: 'ca-aggregation', 'kube-apiserver';
+
 
     
 

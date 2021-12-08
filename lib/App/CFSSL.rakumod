@@ -57,8 +57,8 @@ method new($certdir) {
 }
 
 
-
 # This method creates a file that is required to sign new certs.
+# Note, this is required... it's easy to forget to call it.
 method init-signing-config() {
     my $ca-config = Q:to/CA_CONFIG/;
 		{

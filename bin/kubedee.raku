@@ -4,20 +4,10 @@ use App::LXD;
 use App::Kubedee;
 use App::Kubectl;
 
-my $kubedee_version = "1.0.0";
-my $home = %*ENV{'HOME'};
-my $kubedee-dir = "{$home}/.local/share/kubedee";
-my $kubedee-config-dir = "{$home}/.config/kubedee";
-my $kubedee-cache-dir = "{$kubedee-dir}/cache/{$kubedee_version}";
-my $install_psps = False;
-
 my %*SUB-MAIN-OPTS =
   :named-anywhere,
 ;
 
-
-## todos: 
-# * validate cluster name input
 
 ## Main subroutines
 
@@ -32,23 +22,14 @@ multi sub MAIN('create',
     Bool :$no-set-context,
 ) {
     say "create...";
-    my $kd = App::Kubedee.new(cluster-name => $cluster-name, dir => $kubedee-dir, cache-dir => $kubedee-cache-dir,
-        config-dir => $kubedee-config-dir);
+    my $kd = App::Kubedee.new: $cluster-name;
     $kd.init-dirs;
-    $kd.init-lxd-resources;
-    say "helllo {$kd.cert-dir}";
 
-    my $ca = App::CFSSL.new(cert-dir => "{$kd.cert-dir}");
-    $ca.create-certificate-authority-k8s;
+    my $ca = App::CFSSL.new($kd.certdir);
+    $ca.create-certificate-authority;
 
     
-    ## assemble k8s
-    # download k8s binaries
-    # copy k8s binaries
-    # copy etcd binaries
-    # copy crio files
-    # copy runc binaries
-    # copy cni plugins
+
 
     ## create CAs
     # etcd

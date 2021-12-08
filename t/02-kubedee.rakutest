@@ -1,0 +1,20 @@
+use Test;
+use App::Kubedee;
+use FileSystem::Helpers;
+
+
+FileSystem::Helpers::temp-dir({
+    my $cluster-name = "wowza";
+
+    # structure our test dirs as if $*tmpdir were someone's $HOME
+    my $config-dir = $*tmpdir.add("config/kubedee").Str;
+    my $state-dir = $*tmpdir.add(".local/share/kubedee").Str;
+
+
+    my $kd = App::Kubedee.new: $cluster-name, :$state-dir, :$config-dir;
+
+    is $kd.cert-dir, "{$state-dir}/clusters/{$cluster-name}/certificates", 'cert-dir should be set';
+
+});
+
+done-testing;

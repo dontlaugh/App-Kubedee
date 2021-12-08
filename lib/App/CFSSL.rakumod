@@ -44,91 +44,108 @@ unit class App::CFSSL:ver<1.0.0>;
 
 
 
-# $cert-dir holds our cluster certificates and cfssl configs
-#   $cert-dir/{ca.pem,ca-key.pem,ca-config.json,profile.k8s}
+# $certdir holds our cluster certificates and cfssl configs
+#   $certdir/{ca.pem,ca-key.pem,ca-config.json,profile.k8s}
 # 
 # local -r cluster_name="${1}"
 # local -r target_dir="${kubedee_dir}/clusters/${cluster_name}/certificates"
-has Str $.cert-dir;
+has Str $.certdir;
+has Str $.ca-config-filename = 'ca-config.json';
 
-method create_certificate_admin(Str $cluster-name) {
-
-}
-method create_certificate_aggregation_client() {
-
-}
-method create_certificate_authority_aggregation() {
-
-}
-method create_certificate_authority_etcd() {
-
+method new($certdir) {
+	self.bless(:$certdir);
 }
 
-# Within cert-dir, create ca-key.pem, ca.csr, ca.pem. If these exist, skip
+
+
+# This method creates a file that is required to sign new certs.
+method init-signing-config() {
+    my $ca-config = Q:to/CA_CONFIG/;
+		{
+		  "signing": {
+		    "default": {
+		      "expiry": "8760h"
+		    },
+		    "profiles": {
+		      "kubernetes": {
+		        "usages": ["signing", "key encipherment", "server auth", "client auth"],
+		        "expiry": "8760h"
+		      }
+		    }
+		  }
+		}
+		CA_CONFIG
+    my $fh = open :w, $!certdir.IO.add($!ca-config-filename);
+    $fh.say: $ca-config;
+    $fh.close;
+}
+
+# Within certdir, create ca-key.pem, ca.csr, ca.pem. If these exist, skip
 # their creation.
-method create-certificate-authority-k8s() {
-    # cat cainit.json | cfssl gencert -initca - | cfssljson -bare ca
-    my Str $json = Q:to/END/; 
-{
-  "CN": "Kubernetes",
-  "key": {
-    "algo": "rsa",
-    "size": 2048
-  },
-  "names": [
-    {
-      "C": "DE",
-      "L": "Berlin",
-      "O": "Kubernetes",
-      "OU": "CA",
-      "ST": "Berlin"
-    }
-  ]
-}
-END
+# 
+# This method emulates the following shell script:
+#     cat cainit.json | cfssl gencert -initca - | cfssljson -bare ca
+method create-certificate-authority(Str $ca-name, Str $cn) {
+    my $json = Q:s:to/END/; 
+		{
+		  "CN": "$cn",
+		  "key": {
+		    "algo": "rsa",
+		    "size": 2048
+		  },
+		  "names": [
+		    {
+		      "C": "DE",
+		      "L": "Berlin",
+		      "O": "Kubernetes",
+		      "OU": "CA",
+		      "ST": "Berlin"
+		    }
+		  ]
+		}
+		END
 
-    my $proc = run 'cfssl', 'gencert', '-initca', '-', :out, :in,  cwd => $!cert-dir;
+    my $proc = run 'cfssl', 'gencert', '-initca', '-', :out, :in, :err, cwd => $!certdir;
     $proc.in.say: $json;
     $proc.in.close;
     my $output = $proc.out.slurp;
     $proc.out.close;  # not needed?
-    my $proc2 = run 'cfssljson', '-bare', 'ca', :in, cwd => $!cert-dir;
+    my $proc2 = run 'cfssljson', '-bare', $ca-name, :in, cwd => $!certdir;
     $proc2.in.say: $output;
     $proc2.in.close;
-#    
-#    # create ca-config.json
-#    my $ca-config = Q:to/CA_CONFIG/;
-#{
-#  "signing": {
-#    "default": {
-#      "expiry": "8760h"
-#    },
-#    "profiles": {
-#      "kubernetes": {
-#        "usages": ["signing", "key encipherment", "server auth", "client auth"],
-#        "expiry": "8760h"
-#      }
-#    }
-#  }
-#}
-#CA_CONFIG
-#    my $fh = open :w, 'ca-config.json';
-#    $fh.say: $ca-config;
-#    $fh.close;
-
 }
-method create_certificate_etcd() {
 
-}
-method create_certificate_kube_controller_manager() {
 
-}
-method create_certificate_kubernetes() {
+# CN also becomes the cert name
+# emulate this
+# cat <<EOF | cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes - | cfssljson -bare admin
+method create-certificate(Str $ca-name, Str $cn, Str $profile = 'kubernetes') {
+    my $json = Q:s:to/END/; 
+		{
+		  "CN": "$cn",
+		  "key": {
+		    "algo": "rsa",
+		    "size": 2048
+		  },
+		  "names": [
+		    {
+		      "C": "DE",
+		      "L": "Berlin",
+		      "O": "Kubernetes",
+		      "OU": "CA",
+		      "ST": "Berlin"
+		    }
+		  ]
+		}
+		END
 
-}
-method create_certificate_kube_scheduler() {
-
-}
-method create_certificate_worker() {
-
+    my $proc = run 'cfssl', 'gencert', "-ca={$ca-name}.pem", "-ca-key={$ca-name}-key.pem", 
+        '-config=ca-config.json', "-profile={$profile}", '-', :out, :in, :err, cwd => $!certdir;
+    $proc.in.say: $json;
+    $proc.in.close;
+    my $output = $proc.out.slurp;
+    $proc.out.close; 
+    my $proc2 = run 'cfssljson', '-bare', $cn, :in, :err, cwd => $!certdir;
+    $proc2.in.say: $output;
+    $proc2.in.close;
 }

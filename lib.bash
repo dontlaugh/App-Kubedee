@@ -546,8 +546,6 @@ kubedee::create_certificate_etcd() {
   local -r target_dir="${kubedee_dir}/clusters/${cluster_name}/certificates"
   local ip
   ip="$(kubedee::container_ipv4_address "kubedee-${cluster_name}-etcd")"
-  [[ -z "${ip}" ]] && kubedee::exit_error "Failed to get IPv4 for kubedee-${cluster_name}-etcd"
-  mkdir -p "${target_dir}"
   (
     kubedee::cd_or_exit_error "${target_dir}"
     kubedee::log_info "Generating etcd certificate ..."
@@ -879,49 +877,15 @@ kubedee::configure_etcd() {
   kubedee::create_certificate_etcd "${cluster_name}"
   local ip
   ip="$(kubedee::container_ipv4_address "${container_name}")"
-  kubedee::log_info "Providing files to ${container_name} ..."
+
 
   lxc config device add "${container_name}" binary-etcd disk source="${kubedee_dir}/clusters/${cluster_name}/rootfs/usr/local/bin/etcd" path="/usr/local/bin/etcd"
   lxc config device add "${container_name}" binary-etcdctl disk source="${kubedee_dir}/clusters/${cluster_name}/rootfs/usr/local/bin/etcdctl" path="/usr/local/bin/etcdctl"
 
   lxc file push -p "${kubedee_dir}/clusters/${cluster_name}/certificates/"{etcd.pem,etcd-key.pem,ca-etcd.pem} "${container_name}/etc/etcd/"
 
-  kubedee::log_info "Configuring ${container_name} ..."
   cat <<EOF | lxc exec "${container_name}" bash
-set -euo pipefail
-cat >/etc/systemd/system/etcd.service <<'ETCD_UNIT'
-[Unit]
-Description=etcd
 
-[Service]
-ExecStart=/usr/local/bin/etcd \\
-  --name ${container_name} \\
-  --cert-file=/etc/etcd/etcd.pem \\
-  --key-file=/etc/etcd/etcd-key.pem \\
-  --peer-cert-file=/etc/etcd/etcd.pem \\
-  --peer-key-file=/etc/etcd/etcd-key.pem \\
-  --trusted-ca-file=/etc/etcd/ca-etcd.pem \\
-  --peer-trusted-ca-file=/etc/etcd/ca-etcd.pem \\
-  --peer-client-cert-auth \\
-  --client-cert-auth \\
-  --initial-advertise-peer-urls https://${ip}:2380 \\
-  --listen-peer-urls https://${ip}:2380 \\
-  --listen-client-urls https://${ip}:2379,http://127.0.0.1:2379 \\
-  --advertise-client-urls https://${ip}:2379 \\
-  --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster ${container_name}=https://${ip}:2380 \\
-  --initial-cluster-state new \\
-  --data-dir=/var/lib/etcd
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-ETCD_UNIT
-
-systemctl daemon-reload
-systemctl -q enable etcd
-systemctl start etcd
 EOF
 }
 

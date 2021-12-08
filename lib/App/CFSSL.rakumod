@@ -119,7 +119,7 @@ method create-certificate-authority(Str $ca-name, Str $cn) {
 # CN also becomes the cert name
 # emulate this
 # cat <<EOF | cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes - | cfssljson -bare admin
-method create-certificate(Str $ca-name, Str $cn, Str $profile = 'kubernetes') {
+method create-certificate(Str $ca-name, Str $cn, $O, $OU, Str $profile = 'kubernetes', +@flags) {
     my $json = Q:s:to/END/; 
 		{
 		  "CN": "$cn",
@@ -131,8 +131,8 @@ method create-certificate(Str $ca-name, Str $cn, Str $profile = 'kubernetes') {
 		    {
 		      "C": "DE",
 		      "L": "Berlin",
-		      "O": "Kubernetes",
-		      "OU": "CA",
+		      "O": "$O",
+		      "OU": "$OU",
 		      "ST": "Berlin"
 		    }
 		  ]
@@ -140,7 +140,7 @@ method create-certificate(Str $ca-name, Str $cn, Str $profile = 'kubernetes') {
 		END
 
     my $proc = run 'cfssl', 'gencert', "-ca={$ca-name}.pem", "-ca-key={$ca-name}-key.pem", 
-        '-config=ca-config.json', "-profile={$profile}", '-', :out, :in, :err, cwd => $!certdir;
+        '-config=ca-config.json', "-profile={$profile}", @flags, '-', :out, :in, :err, cwd => $!certdir;
     $proc.in.say: $json;
     $proc.in.close;
     my $output = $proc.out.slurp;

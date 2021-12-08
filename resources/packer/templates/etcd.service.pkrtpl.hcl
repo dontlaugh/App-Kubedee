@@ -2,7 +2,7 @@
 Description=etcd
 
 [Service]
-EnvironmentFile=
+EnvironmentFile=/etc/etcd/env
 ExecStart=/usr/local/bin/etcd \
   --name "${CONTAINER_NAME}" \
   --cert-file="/etc/etcd/etcd.pem" \

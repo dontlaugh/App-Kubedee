@@ -2,6 +2,12 @@ unit class App::LXD;
 
 has $!project = "default";
 
+
+method launch(Str $name, Str $image, +@flags) {
+	# slurpy args
+    my $proc = run 'lxc', 'launch', $image, $name, @flags;
+}
+
 method create-network(::?CLASS:U $lxd: Str $name) {
     #my $rand;
     #$rand ~= ('0' .. 'z').pick() for 1..5;

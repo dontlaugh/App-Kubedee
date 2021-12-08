@@ -19,7 +19,7 @@ FileSystem::Helpers::temp-dir({
 	ok $ca-csr.e, 'CA csr should exist';
 	ok $ca-pem.e, 'CA cert should exist';
 
-	$cfssl.create-certificate: 'some-ca-name', 'butterfly';
+	$cfssl.create-certificate: 'some-ca-name', 'butterfly', 'An O', 'An OU';
 	my $cert = $*tmpdir.add('butterfly.pem');
 	my $key = $*tmpdir.add('butterfly-key.pem');
 	my $csr = $*tmpdir.add('butterfly.csr');

@@ -15,9 +15,7 @@ multi sub MAIN('controller-ip', Str $cluster-name) {
     say "controller-ip...";
 }
 
-multi sub MAIN('create', 
-    Str $cluster-name,
-) {
+multi sub MAIN('create', Str $cluster-name) {
     say "create...";
     my $kd = App::Kubedee.new: $cluster-name;
     $kd.init-dirs;
@@ -29,39 +27,19 @@ multi sub MAIN('create',
     $ca.create-certificate-authority: 'ca-etcd', 'etcd';
     $ca.create-certificate: 'ca', 'admin';
     $ca.create-certificate: 'ca-aggregation', 'kube-apiserver';
-
-
-    
-
-
-    ## create CAs
-    # etcd
-    # k8s
-    # aggregation
-
-    ## create client certs
-    # aggregation client
-    # admin client
-}
-
-multi sub MAIN('up',
-    Str $cluster-name,
-    Str :$kubernetes-version,
-    Int :$num-worker = 2,
-    Bool :$no-set-context,
-    Array[Str] :@apiserver-set-hostnames,
-    Str :$bin-dir = "./_output/bin",
-) {
-    say "up...";
 }
 
 multi sub MAIN('start', Str $cluster-name) {
-    # ensure cluster exists
-    # gen random suffix
 
-    # prep lxd container image
-    # launch lxd container
-    # configure worker (?)
+    # launch etcd
+    my $kd = App::Kubedee.new: $cluster-name;
+    $kd.launch-etcd;
+    $kd.launch-controller;
+    $kd.launch-worker;
+    
+    $kd.configure-etcd;
+    
+
 
 }
 
@@ -110,7 +88,6 @@ Usage:
   kubedee [options] smoke-test <cluster name>        smoke test a cluster
   kubedee [options] start <cluster name>             start a cluster
   kubedee [options] start-worker <cluster name>      start a new worker node in a cluster
-  kubedee [options] up <cluster name>                create + start in one command
   kubedee [options] version                          print kubedee version and exit
 
 Options:

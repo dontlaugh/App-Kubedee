@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/dontlaugh/App-Kubedee/workflows/test/badge.svg)](https://github.com/dontlaugh/App-Kubedee/actions)
+# Kubedee
 
-
+A Raku rewrite of schu's `kubedee`. Not done yet.
 

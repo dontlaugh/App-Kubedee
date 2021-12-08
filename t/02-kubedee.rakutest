@@ -2,7 +2,7 @@ use Test;
 use App::Kubedee;
 use FileSystem::Helpers;
 
-
+plan 5;
 FileSystem::Helpers::temp-dir({
     my $cluster-name = "wowza";
 
@@ -12,9 +12,12 @@ FileSystem::Helpers::temp-dir({
 
 
     my $kd = App::Kubedee.new: $cluster-name, :$state-dir, :$config-dir;
-
     is $kd.cert-dir, "{$state-dir}/clusters/{$cluster-name}/certificates", 'cert-dir should be set';
 
-});
+    $kd.init-dirs;
+    ok $kd.cert-dir.IO.e, 'cert-dir should exist';
+    ok $kd.state-dir.IO.e, 'state-dir should exist';
+    ok $kd.config-dir.IO.e, 'config-dir should exist';
+    ok $kd.cache-dir.IO.e, 'cache-dir should exist';
 
-done-testing;
+});

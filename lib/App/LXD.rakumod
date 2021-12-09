@@ -8,6 +8,12 @@ method launch(Str $name, Str $image, +@flags) {
     my $proc = run 'lxc', 'launch', $image, $name, @flags;
 }
 
+method container-status(Str $name --> Str) {
+	my $proc = run 'lxc', 'list', '--format=json', :out;
+	my @container-infos = from-json $proc.out.slurp: :close;
+	for @container-infos -> %info
+}
+
 method create-network(::?CLASS:U $lxd: Str $name) {
     #my $rand;
     #$rand ~= ('0' .. 'z').pick() for 1..5;

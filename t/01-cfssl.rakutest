@@ -10,7 +10,7 @@ FileSystem::Helpers::temp-dir({
 	my $ca-config = $*tmpdir.add('ca-config.json');
 	ok $ca-config.e, 'init-signing-config method should create ca-config.json';
 
-	$cfssl.create-certificate-authority: 'some-ca-name', 'Some CN';
+	$cfssl.create-certificate-authority: 'some-ca-name', 'Some CN', 'Some O', 'Some OU';
 	my $ca-key = $*tmpdir.add('some-ca-name-key.pem');
 	my $ca-csr = $*tmpdir.add('some-ca-name.csr');
 	my $ca-pem = $*tmpdir.add('some-ca-name.pem');

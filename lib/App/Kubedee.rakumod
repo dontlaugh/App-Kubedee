@@ -49,8 +49,17 @@ method configure-etcd {
     my $ip = 'get-it-somehow';
     $cfssl.create-certificate: 'ca-etcd', $cn, $O, $OU, $profile, "-hostnames={$ip},127.0.0.1";
 
-    # OLD KUBEDEE: mount etcd and etcdctl
+    # our etcd container name; we'll only have one etcd container
     my $container = "kubedee-{$!cluster-name}-etcd";
+
+    # block until etcd is running
+    my $lxd = App::LXD.new;
+    my $status = $lxd.container-status($container);
+    until $status eq 'Running' {
+        $status = $lxd.container-status($container);
+        say "Waiting for $container; status: $status";
+        sleep 1;
+    }
 
     # push certs 
     # lxc file push -p "${kubedee_dir}/clusters/${cluster_name}/certificates/"{etcd.pem,etcd-key.pem,ca-etcd.pem} "${container_name}/etc/etcd/"

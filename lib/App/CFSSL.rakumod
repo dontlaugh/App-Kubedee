@@ -85,7 +85,7 @@ method init-signing-config() {
 # 
 # This method emulates the following shell script:
 #     cat cainit.json | cfssl gencert -initca - | cfssljson -bare ca
-method create-certificate-authority(Str $ca-name, Str $cn) {
+method create-certificate-authority(Str $ca-name, Str $cn, $O, $OU) {
     my $json = Q:s:to/END/; 
 		{
 		  "CN": "$cn",
@@ -97,8 +97,8 @@ method create-certificate-authority(Str $ca-name, Str $cn) {
 		    {
 		      "C": "DE",
 		      "L": "Berlin",
-		      "O": "Kubernetes",
-		      "OU": "CA",
+		      "O": "$O",
+		      "OU": "$OU",
 		      "ST": "Berlin"
 		    }
 		  ]

@@ -1,5 +1,5 @@
 unit class App::LXD;
-
+use JSON::Fast;
 has $!project = "default";
 
 
@@ -11,7 +11,14 @@ method launch(Str $name, Str $image, +@flags) {
 method container-status(Str $name --> Str) {
 	my $proc = run 'lxc', 'list', '--format=json', :out;
 	my @container-infos = from-json $proc.out.slurp: :close;
-	for @container-infos -> %info
+	my Str $status;
+	for @container-infos -> %info {
+		if %info{'name'} eq $name {
+            return %info{'status'};
+        }
+	}
+    # todo: handle this with enums or option types or something
+    return 'notfound';
 }
 
 method create-network(::?CLASS:U $lxd: Str $name) {

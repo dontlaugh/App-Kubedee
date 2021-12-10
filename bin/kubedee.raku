@@ -22,11 +22,15 @@ multi sub MAIN('create', Str $cluster-name) {
 
     my $ca = App::CFSSL.new($kd.cert-dir);
     $ca.init-signing-config;
-    $ca.create-certificate-authority: 'ca', 'Kubernetes';
-    $ca.create-certificate-authority: 'ca-aggregation', 'Kubernetes Front Proxy CA';
-    $ca.create-certificate-authority: 'ca-etcd', 'etcd';
-    $ca.create-certificate: 'ca', 'admin';
-    $ca.create-certificate: 'ca-aggregation', 'kube-apiserver';
+    # this is a lot of params, maybe named params or another object would be more clear
+    $ca.create-certificate-authority: 'ca', 'Kubernetes', 'Kubernetes', 'CA';
+    $ca.create-certificate-authority: 'ca-aggregation', 'Kubernetes Front Proxy CA', 'Kubernetes Front Proxy',
+    'CA';
+    $ca.create-certificate-authority: 'ca-etcd', 'etcd', 'etcd', 'CA';
+    # O and OU are a part of our permissions for these, iiuc
+    $ca.create-certificate: 'ca', 'admin', 'system:masters', 'kubedee';
+    $ca.create-certificate: 'ca-aggregation', 'kube-apiserver', 'kube-apiserver', 'kubedee';
+
 }
 
 multi sub MAIN('start', Str $cluster-name) {
@@ -41,6 +45,16 @@ multi sub MAIN('start', Str $cluster-name) {
     
 
 
+}
+multi sub MAIN('test') {
+    my $lxd = App::LXD.new;
+    my $status = $lxd.container-status('redis');
+    until $status eq 'Running' {
+        $status = $lxd.container-status('redis');
+        say "status: $status";
+        sleep 1;
+    }
+    say "done";
 }
 
 multi sub MAIN('create-admin-sa', Str $cluster-name) {

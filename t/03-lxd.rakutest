@@ -250,6 +250,4 @@ my $addr = $lxd.extract-ipv4-address: $lxc-list-output, 'redis';
 
 is $addr, '10.233.180.6';
 
-
-
 done-testing;

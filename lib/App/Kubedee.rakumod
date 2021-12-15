@@ -48,14 +48,13 @@ method configure-etcd {
     my $O = 'etcd';
     my $OU = 'kubedee';
     my $profile = 'kubernetes';
-    my $ip = 'get-it-somehow';
-    $cfssl.create-certificate: 'ca-etcd', $cn, $O, $OU, $profile, "-hostname={$ip},127.0.0.1";
-
     # our etcd container name; we'll only have one etcd container
     my $container = "kubedee-{$!cluster-name}-etcd";
-
     # block until etcd is running
     my $lxd = App::LXD.new;
+    my $ip = $lxd.container-ipv4-address: $container;
+    $cfssl.create-certificate: 'ca-etcd', $cn, $O, $OU, $profile, "-hostname={$ip},127.0.0.1";
+
     my $status = $lxd.container-status($container);
     until $status eq 'Running' {
         $status = $lxd.container-status($container);

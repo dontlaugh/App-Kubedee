@@ -1,0 +1,255 @@
+use Test;
+use App::LXD;
+
+
+my $lxc-list-output = q:to/LXC_LIST_OUTPUT/;
+	[
+	  {
+	    "architecture": "x86_64",
+	    "config": {
+	      "image.architecture": "amd64",
+	      "image.description": "Ubuntu hirsute amd64 (20211101_07:43)",
+	      "image.os": "Ubuntu",
+	      "image.release": "hirsute",
+	      "image.serial": "20211101_07:43",
+	      "image.type": "squashfs",
+	      "image.variant": "cloud",
+	      "volatile.base_image": "7e68080daefdc36d8d7448a29f37bacd9f933f5c99b8556138796ecd38e7f91c",
+	      "volatile.eth0.hwaddr": "00:16:3e:c1:a7:b0",
+	      "volatile.idmap.base": "0",
+	      "volatile.idmap.current": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.idmap.next": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.last_state.idmap": "[]",
+	      "volatile.last_state.power": "STOPPED",
+	      "volatile.uuid": "8cba1fae-c1d5-48a3-b420-399451ba9ade"
+	    },
+	    "devices": {},
+	    "ephemeral": false,
+	    "profiles": [
+	      "default"
+	    ],
+	    "stateful": false,
+	    "description": "",
+	    "created_at": "2021-11-02T21:18:59.497689238-04:00",
+	    "expanded_config": {
+	      "image.architecture": "amd64",
+	      "image.description": "Ubuntu hirsute amd64 (20211101_07:43)",
+	      "image.os": "Ubuntu",
+	      "image.release": "hirsute",
+	      "image.serial": "20211101_07:43",
+	      "image.type": "squashfs",
+	      "image.variant": "cloud",
+	      "volatile.base_image": "7e68080daefdc36d8d7448a29f37bacd9f933f5c99b8556138796ecd38e7f91c",
+	      "volatile.eth0.hwaddr": "00:16:3e:c1:a7:b0",
+	      "volatile.idmap.base": "0",
+	      "volatile.idmap.current": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.idmap.next": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.last_state.idmap": "[]",
+	      "volatile.last_state.power": "STOPPED",
+	      "volatile.uuid": "8cba1fae-c1d5-48a3-b420-399451ba9ade"
+	    },
+	    "expanded_devices": {
+	      "eth0": {
+	        "name": "eth0",
+	        "network": "lxdbr0",
+	        "type": "nic"
+	      },
+	      "root": {
+	        "path": "/",
+	        "pool": "default",
+	        "type": "disk"
+	      }
+	    },
+	    "name": "files",
+	    "status": "Stopped",
+	    "status_code": 102,
+	    "last_used_at": "2021-12-09T17:13:08.291445248-05:00",
+	    "location": "none",
+	    "type": "container",
+	    "project": "default",
+	    "backups": null,
+	    "state": {
+	      "status": "Stopped",
+	      "status_code": 102,
+	      "disk": {},
+	      "memory": {
+	        "usage": 0,
+	        "usage_peak": 0,
+	        "swap_usage": 0,
+	        "swap_usage_peak": 0
+	      },
+	      "network": null,
+	      "pid": 0,
+	      "processes": 0,
+	      "cpu": {
+	        "usage": 0
+	      }
+	    },
+	    "snapshots": null
+	  },
+	  {
+	    "architecture": "x86_64",
+	    "config": {
+	      "image.architecture": "amd64",
+	      "image.description": "Ubuntu hirsute amd64 (20211115_08:27)",
+	      "image.os": "Ubuntu",
+	      "image.release": "hirsute",
+	      "image.serial": "20211115_08:27",
+	      "image.type": "squashfs",
+	      "image.variant": "default",
+	      "volatile.base_image": "d1e73cf708bfa9b44978b6309bede28f11f64360a5a3917d524131b9d02bde49",
+	      "volatile.eth0.host_name": "veth69b0ccef",
+	      "volatile.eth0.hwaddr": "00:16:3e:2a:eb:ef",
+	      "volatile.idmap.base": "0",
+	      "volatile.idmap.current": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.idmap.next": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.last_state.idmap": "[]",
+	      "volatile.last_state.power": "RUNNING",
+	      "volatile.uuid": "d8517a60-4497-4da6-a0bd-c0d20af9e7d1"
+	    },
+	    "devices": {},
+	    "ephemeral": false,
+	    "profiles": [
+	      "default"
+	    ],
+	    "stateful": false,
+	    "description": "",
+	    "created_at": "2021-11-15T23:10:01.299778861-05:00",
+	    "expanded_config": {
+	      "image.architecture": "amd64",
+	      "image.description": "Ubuntu hirsute amd64 (20211115_08:27)",
+	      "image.os": "Ubuntu",
+	      "image.release": "hirsute",
+	      "image.serial": "20211115_08:27",
+	      "image.type": "squashfs",
+	      "image.variant": "default",
+	      "volatile.base_image": "d1e73cf708bfa9b44978b6309bede28f11f64360a5a3917d524131b9d02bde49",
+	      "volatile.eth0.host_name": "veth69b0ccef",
+	      "volatile.eth0.hwaddr": "00:16:3e:2a:eb:ef",
+	      "volatile.idmap.base": "0",
+	      "volatile.idmap.current": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.idmap.next": "[{\"Isuid\":true,\"Isgid\":false,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000},{\"Isuid\":false,\"Isgid\":true,\"Hostid\":1000000,\"Nsid\":0,\"Maprange\":1000000000}]",
+	      "volatile.last_state.idmap": "[]",
+	      "volatile.last_state.power": "RUNNING",
+	      "volatile.uuid": "d8517a60-4497-4da6-a0bd-c0d20af9e7d1"
+	    },
+	    "expanded_devices": {
+	      "eth0": {
+	        "name": "eth0",
+	        "network": "lxdbr0",
+	        "type": "nic"
+	      },
+	      "root": {
+	        "path": "/",
+	        "pool": "default",
+	        "type": "disk"
+	      }
+	    },
+	    "name": "redis",
+	    "status": "Running",
+	    "status_code": 103,
+	    "last_used_at": "2021-12-11T22:47:45.084141752-05:00",
+	    "location": "none",
+	    "type": "container",
+	    "project": "default",
+	    "backups": null,
+	    "state": {
+	      "status": "Running",
+	      "status_code": 103,
+	      "disk": {},
+	      "memory": {
+	        "usage": 145043456,
+	        "usage_peak": 185077760,
+	        "swap_usage": 0,
+	        "swap_usage_peak": 0
+	      },
+	      "network": {
+	        "eth0": {
+	          "addresses": [
+	            {
+	              "family": "inet",
+	              "address": "10.233.180.6",
+	              "netmask": "24",
+	              "scope": "global"
+	            },
+	            {
+	              "family": "inet6",
+	              "address": "fd42:3a13:656:a69d:216:3eff:fe2a:ebef",
+	              "netmask": "64",
+	              "scope": "global"
+	            },
+	            {
+	              "family": "inet6",
+	              "address": "fe80::216:3eff:fe2a:ebef",
+	              "netmask": "64",
+	              "scope": "link"
+	            }
+	          ],
+	          "counters": {
+	            "bytes_received": 260344,
+	            "bytes_sent": 178889,
+	            "packets_received": 1652,
+	            "packets_sent": 1735,
+	            "errors_received": 0,
+	            "errors_sent": 0,
+	            "packets_dropped_outbound": 0,
+	            "packets_dropped_inbound": 0
+	          },
+	          "hwaddr": "00:16:3e:2a:eb:ef",
+	          "host_name": "veth69b0ccef",
+	          "mtu": 1500,
+	          "state": "up",
+	          "type": "broadcast"
+	        },
+	        "lo": {
+	          "addresses": [
+	            {
+	              "family": "inet",
+	              "address": "127.0.0.1",
+	              "netmask": "8",
+	              "scope": "local"
+	            },
+	            {
+	              "family": "inet6",
+	              "address": "::1",
+	              "netmask": "128",
+	              "scope": "local"
+	            }
+	          ],
+	          "counters": {
+	            "bytes_received": 2330,
+	            "bytes_sent": 2330,
+	            "packets_received": 20,
+	            "packets_sent": 20,
+	            "errors_received": 0,
+	            "errors_sent": 0,
+	            "packets_dropped_outbound": 0,
+	            "packets_dropped_inbound": 0
+	          },
+	          "hwaddr": "",
+	          "host_name": "",
+	          "mtu": 65536,
+	          "state": "up",
+	          "type": "loopback"
+	        }
+	      },
+	      "pid": 7485,
+	      "processes": 18,
+	      "cpu": {
+	        "usage": 145385804097
+	      }
+	    },
+	    "snapshots": null
+	  }
+	]
+    LXC_LIST_OUTPUT
+
+
+my $lxd = App::LXD.new;
+my $addr = $lxd.extract-ipv4-address: $lxc-list-output, 'redis';
+
+is $addr, '10.233.180.6';
+
+
+
+done-testing;

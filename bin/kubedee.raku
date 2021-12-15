@@ -24,28 +24,25 @@ multi sub MAIN('create', Str $cluster-name) {
     $ca.init-signing-config;
     # this is a lot of params, maybe named params or another object would be more clear
     $ca.create-certificate-authority: 'ca', 'Kubernetes', 'Kubernetes', 'CA';
-    $ca.create-certificate-authority: 'ca-aggregation', 'Kubernetes Front Proxy CA', 'Kubernetes Front Proxy',
-    'CA';
+    $ca.create-certificate-authority: 'ca-aggregation', 'Kubernetes Front Proxy CA',
+        'Kubernetes Front Proxy', 'CA';
     $ca.create-certificate-authority: 'ca-etcd', 'etcd', 'etcd', 'CA';
     # O and OU are a part of our permissions for these, iiuc
     $ca.create-certificate: 'ca', 'admin', 'system:masters', 'kubedee';
     $ca.create-certificate: 'ca-aggregation', 'kube-apiserver', 'kube-apiserver', 'kubedee';
-
 }
 
 multi sub MAIN('start', Str $cluster-name) {
 
-    # launch etcd
-    my $kd = App::Kubedee.new: $cluster-name;
+my $kd = App::Kubedee.new: $cluster-name;
     $kd.launch-etcd;
     $kd.launch-controller;
     $kd.launch-worker;
     
     $kd.configure-etcd;
     
-
-
 }
+
 multi sub MAIN('test') {
     my $lxd = App::LXD.new;
     my $status = $lxd.container-status('redis');

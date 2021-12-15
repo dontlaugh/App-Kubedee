@@ -50,9 +50,29 @@ method launch-container(::?CLASS:U $lxd) {
 method launch-etcd(::?CLASS:U $lxd) {
 
 }
-method container-ipv4-address(::?CLASS:U $lxd) {
 
+method extract-ipv4-address(Str $json, Str $container-name, Str $iface = 'eth0' --> Str) {
+    my @container-infos = from-json $json;
+    for @container-infos -> %info {
+        if %info{'name'} eq $container-name {
+            my @addrs = %info{'state'}{'network'}{"$iface"}{'addresses'};
+            for @addrs -> @addr {
+                for @addr -> %aa {
+                    if %aa{'family'} eq 'inet' {
+                        return %aa{'address'};
+                    }
+                }
+            }
+        }
+    }
+    return 'notfound';
 }
+
+method container-ipv4-address(Str $name) {
+    my $proc = run 'lxc', 'list', '--format=json', :out;
+    return self.extract-ipv4-address: $proc.out.slurp, $name; 
+}
+
 method copy-cni-plugins(::?CLASS:U $lxd) {
 
 }

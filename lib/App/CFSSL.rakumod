@@ -138,9 +138,9 @@ method create-certificate(Str $ca-name, Str $cn, $O, $OU, Str $profile = 'kubern
 		  ]
 		}
 		END
-
+    # todo print errors here! try catch!
     my $proc = run 'cfssl', 'gencert', "-ca={$ca-name}.pem", "-ca-key={$ca-name}-key.pem", 
-        '-config=ca-config.json', "-profile={$profile}", @flags, '-', :out, :in, :err, cwd => $!certdir;
+        '-config=ca-config.json', "-profile={$profile}", @flags, '-', :out, :in, cwd => $!certdir;
     $proc.in.say: $json;
     $proc.in.close;
     my $output = $proc.out.slurp;

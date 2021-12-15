@@ -1,4 +1,6 @@
 unit class App::Kubedee:ver<1.0.0>;
+use App::LXD;
+use App::CFSSL;
 
 
 has $.state-dir;
@@ -47,7 +49,7 @@ method configure-etcd {
     my $OU = 'kubedee';
     my $profile = 'kubernetes';
     my $ip = 'get-it-somehow';
-    $cfssl.create-certificate: 'ca-etcd', $cn, $O, $OU, $profile, "-hostnames={$ip},127.0.0.1";
+    $cfssl.create-certificate: 'ca-etcd', $cn, $O, $OU, $profile, "-hostname={$ip},127.0.0.1";
 
     # our etcd container name; we'll only have one etcd container
     my $container = "kubedee-{$!cluster-name}-etcd";

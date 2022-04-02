@@ -41,8 +41,6 @@ method launch-etcd {
 }
 
 method configure-etcd {
-    # wait for container to be up
-    # get etcd ip addr, create certificate (how?)
     my $cfssl = App::CFSSL.new: $!cert-dir;
     my $cn = 'etcd';
     my $O = 'etcd';
@@ -75,27 +73,6 @@ method configure-etcd {
     # systemctl daemon-reload, enable, start etcd
     run 'lxc', 'exec', $container, '--', 'systemctl', 'daemon-reload';
     run 'lxc', 'exec', $container, '--', 'systemctl', 'enable', '--now', '-q', 'etcd';
-
-      # CREATE CERT
-
-      #    cat <<EOF | cfssl gencert -ca=ca-etcd.pem -ca-key=ca-etcd-key.pem -config=ca-config.json -profile=kubernetes -hostname="${ip},127.0.0.1" - | cfssljson -bare etcd
-      #{
-      #  "CN": "etcd",
-      #  "key": {
-      #    "algo": "rsa",
-      #    "size": 2048
-      #  },
-      #  "names": [
-      #    {
-      #      "C": "DE",
-      #      "L": "Berlin",
-      #      "O": "etcd",
-      #      "OU": "kubedee",
-      #      "ST": "Berlin"
-      #    }
-      #  ]
-      #}
-      #EOF
 }
 
 method launch-controller {
@@ -110,19 +87,61 @@ method launch-worker {
     $lxd.launch("kubedee-{$!cluster-name}-worker", $image);
 }
 
+
+method configure-controller() {
+    my $cfssl = App::CFSSL.new: $!cert-dir;
+    my $container = "kubedee-{$!cluster-name}-controller";
+
+    my $cn = "kubernetes";
+    my $O = "Kubernetes";
+    my $OU = "kubedee";
+    my $profile = "kubernetes";
+
+    my $lxd = App::LXD.new;
+    my $ip = $lxd.container-ipv4-address: $container;
+    # TODO: maybe add extra api server hostnames here
+    $cfssl.create-certificate: 'ca', $cn, $O, $OU, $profile, "-hostname={$ip},127.0.0.1";
+
+    my $proxy-cn = "system:kube-proxy";
+    my $proxy-O = "system:node-proxier";
+    my $proxy-OU = "kubedee";
+    my $proxy-profile = "kubernetes";
+    $cfssl.create-certificate: 'ca', $proxy-cn, $proxy-O, $proxy-OU, $proxy-profile, "-hostname={$ip},127.0.0.1";
+
+    # Now really configure k8s controller
+    my $etcd-ip = $lxd.container-ipv4-address: "kubedee-{$!cluster-name}-etcd";
+
+    # create cert kube-controller-manager
+    # create cert kube-scheduler
+    # create kubeconfig controller
+
+    # push all certs into /etc/kubernetes/
+    # push kube-controller-manager.kubeconfig,kube-scheduler.kubeconfig into /etc/kubernetes/
+    
+    # generate systemd EnvironmentFile=/etc/kubernetes/kube-apiserver-env
+    # * ETCD_IP
+    # * ADMISSION_PLUGINS
+
+    # push /etc/kubernetes/config/kube-scheduler.yaml
+
+    # daemon-reload
+    #
+
+}
+
+
 method smoke-test(::?CLASS:U $kd) {
+
 }
 
 method configure-worker(::?CLASS:U $kd) {
+
 }
-
-method configure-controller(::?CLASS:U $kd) {
-}
-
-
 
 method apiserver-wait-running(::?CLASS:U $kd) {
+
 }
 
 method container-wait-running(::?CLASS:U $kd) {
+
 }

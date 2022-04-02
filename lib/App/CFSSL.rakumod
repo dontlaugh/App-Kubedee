@@ -144,8 +144,10 @@ method create-certificate(Str $ca-name, Str $cn, $O, $OU, Str $profile = 'kubern
     $proc.in.say: $json;
     $proc.in.close;
     my $output = $proc.out.slurp;
-    $proc.out.close; 
-    my $proc2 = run 'cfssljson', '-bare', $cn, :in, :err, cwd => $!certdir;
+    $proc.out.close;
+    # FIXME: strip "system:" from the front of our CN for our argument to -bare
+    my $modded-cn = $cn.subst(/system\:/, "");
+    my $proc2 = run 'cfssljson', '-bare', $modded-cn, :in, :err, cwd => $!certdir;
     $proc2.in.say: $output;
     $proc2.in.close;
 }

@@ -83,7 +83,7 @@ multi sub MAIN('version') {
 
 # TODO use this override
 # https://docs.raku.org/language/create-cli#sub_USAGE
-sub USAGEax() {
+sub USAGE() {
     print Q:c:to/EOH/; 
 kubedee - unreleased
 
